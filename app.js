@@ -1,6 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, getDoc } from 'firebase/firestore';
 import express from 'express';
+import path from 'path';
+import bodyParser  from 'body-parser';
+import { request } from 'https';
 
 const firebaseConfig = {
     apiKey: "AIzaSyANX_kUP7tzvQiAnCtys3TpOtfU0Zaogq8",
@@ -19,6 +22,7 @@ const docSnap = await getDoc(docRef);
 var user;
 var passwd; 
 
+
 try { 
     if (docSnap.exists()) {
         var obj = JSON.stringify(docSnap.data());
@@ -32,17 +36,41 @@ try {
 
 
 const app = express();
+const __dirname = path.resolve();
+app.use(bodyParser.urlencoded({extended: false}));
 
 //Rota principal
 app.get("/", function(req, res) {
-    res.send('Bem-Vindos!!!');
+    //res.send('Bem-Vindos!!!');
+    res.sendFile(path.join(__dirname, 'login.html'));
 });
 
 
-//rota login
-app.get("/login", function(req, res) {
-    res.send('user:' + user + ' passwd:' + passwd);
+
+app.post("/login", function(req, res) {
+   
+    try {
+      
+        if (req.body.username == user 
+           &&  req.body.password == passwd){
+
+            res.redirect('https://webpetshop.herokuapp.com')
+       }
+       else {
+           res.send('Erro usuário e senha!');
+
+       }
+
+
+   } catch (e) {
+      res.send("Internal server error", e);
+           
+      
+   }
+    
 });
+
+
 
 app.listen(3000, () => {
    console.log('iniciando servidor');
